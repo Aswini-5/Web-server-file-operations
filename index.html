@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node.js File Upload and Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        h2 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #uploadedImage {
+            display: block;
+            margin: 20px 0;
+            max-width: 100%;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #deleteButton {
+            background-color: #f44336;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: none;
+            transition: background-color 0.3s;
+        }
+
+        #deleteButton:hover {
+            background-color: #d32f2f;
+        }
+
+        .info-text {
+            font-size: 16px;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            button, #deleteButton {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Node.js File Upload and Management</h1>
+
+        <!-- Form to upload a file -->
+        <h2>Upload an Image</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" required><br><br>
+            <button type="submit">Upload File</button>
+        </form>
+
+        <!-- Section to display the uploaded image -->
+        <h2>Uploaded Image</h2>
+        <img id="uploadedImage" src="" alt="Uploaded Image" />
+
+        <!-- Section for file deletion -->
+        <h2>Delete Uploaded File</h2>
+        <button id="deleteButton">Delete File</button>
+
+        <div class="info-text">Only image files are allowed, and each file will be stored in the 'uploads' folder on the server.</div>
+    </div>
+
+    <script>
+        // Handle file upload
+        document.getElementById('uploadForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    const fileName = message.split(': ')[1];
+                    document.getElementById('uploadedImage').src = '/uploads/' + fileName;
+                    document.getElementById('uploadedImage').style.display = 'block';
+                    document.getElementById('deleteButton').style.display = 'inline-block';
+                    document.getElementById('deleteButton').onclick = () => deleteFile(fileName);
+                })
+                .catch(error => console.error('Error uploading file:', error));
+        });
+
+        // Function to delete the file
+        function deleteFile(fileName) {
+            fetch('/delete/' + fileName, { method: 'DELETE' })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    document.getElementById('uploadedImage').style.display = 'none';
+                    document.getElementById('deleteButton').style.display = 'none';
+                })
+                .catch(error => console.error('Error deleting file:', error));
+        }
+    </script>
+</body>
+
+</html>
